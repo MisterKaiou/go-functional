@@ -3,8 +3,9 @@ package result
 import (
 	"errors"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestOk(t *testing.T) {
@@ -19,8 +20,8 @@ func TestOk(t *testing.T) {
 	refRes := Ok(&s)
 
 	// Testing Pass by Reference
-	assert.Equal(t, *refRes.ok, s)
-	assert.Equal(t, refRes.ok, &s)
+	assert.Equal(t, s, *(refRes.ok.(*string)))
+	assert.Equal(t, &s, refRes.ok)
 	assert.Nil(t, refRes.err)
 }
 
@@ -49,7 +50,7 @@ func TestMapWithError(t *testing.T) {
 
 	assert.Equal(t, err, mappedRes.err)
 	assert.Equal(t, &err, &mappedRes.err)
-	assert.Equal(t, mappedRes.ok, *new(bool))
+	assert.Nil(t, mappedRes.ok)
 }
 
 func TestBindNoError(t *testing.T) {
@@ -70,7 +71,7 @@ func TestBindWithError(t *testing.T) {
 
 	assert.Equal(t, err, boundRes.err)
 	assert.Equal(t, &err, &boundRes.err)
-	assert.Equal(t, boundRes.ok, *new(bool))
+	assert.Nil(t, boundRes.ok)
 }
 
 func TestMatchNoError(t *testing.T) {
@@ -125,12 +126,10 @@ func TestUnwrapError(t *testing.T) {
 }
 
 func TestStringOk(t *testing.T) {
-	type SomeType struct{ Prop string }
-
 	expected := "Hi!"
-	res := Ok(SomeType{Prop: expected})
+	res := Ok(expected)
 
-	assert.Equal(t, "{"+expected+"}", res.String())
+	assert.Equal(t, expected, res.String())
 }
 
 func TestStringError(t *testing.T) {
@@ -157,5 +156,5 @@ func TestFromTupleOfWithError(t *testing.T) {
 	res := FromTupleOf[int](funcThatReturnsATuple())
 
 	assert.Equal(t, expected, res.err)
-	assert.Equal(t, 0, res.ok)
+	assert.Nil(t, res.ok)
 }

@@ -1,6 +1,7 @@
 package option
 
 import (
+	"fmt"
 	"github.com/MisterKaiou/go-functional/unit"
 )
 
@@ -18,6 +19,14 @@ func (o *Option[Of]) IsSome() bool {
 
 func (o *Option[Of]) IsNone() bool {
 	return !o.IsSome()
+}
+
+func (o *Option[Of]) String() string {
+	if o.IsNone() {
+		return "None"
+	}
+
+	return fmt.Sprint(o.some)
 }
 
 // Unwrap Can panic if this Result is an error. Prefer Match over this

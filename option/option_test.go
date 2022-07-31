@@ -7,6 +7,18 @@ import (
 	"testing"
 )
 
+func TestStringSome(t *testing.T) {
+	opt := Some(42)
+
+	assert.Equal(t, "42", opt.String())
+}
+
+func TestStringNone(t *testing.T) {
+	opt := None[unit.Unit]()
+
+	assert.Equal(t, "None", opt.String())
+}
+
 func TestNone(t *testing.T) {
 	opt := None[unit.Unit]()
 

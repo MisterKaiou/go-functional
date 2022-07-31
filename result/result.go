@@ -2,8 +2,10 @@ package result
 
 import "fmt"
 
+type ok[Of any] any
+
 type Result[Ok any] struct {
-	ok  Ok
+	ok  ok[Ok]
 	err error
 }
 
@@ -29,7 +31,7 @@ func (r *Result[Ok]) Unwrap() Ok {
 		panic("cannot get the value of an error")
 	}
 
-	return r.ok
+	return r.ok.(Ok)
 }
 
 func Map[From any, To any](res *Result[From], mapping func(From) To) *Result[To] {
@@ -37,7 +39,7 @@ func Map[From any, To any](res *Result[From], mapping func(From) To) *Result[To]
 		return Error[To](res.err)
 	}
 
-	return Ok[To](mapping(res.ok))
+	return Ok[To](mapping(res.ok.(From)))
 }
 
 func Bind[From any, To any](res *Result[From], binding func(From) *Result[To]) *Result[To] {
@@ -45,7 +47,7 @@ func Bind[From any, To any](res *Result[From], binding func(From) *Result[To]) *
 		return Error[To](res.err)
 	}
 
-	return binding(res.ok)
+	return binding(res.ok.(From))
 }
 
 func Match[Ok any, To any](res *Result[Ok], ok func(Ok) To, failed func(error) To) To {
@@ -53,7 +55,7 @@ func Match[Ok any, To any](res *Result[Ok], ok func(Ok) To, failed func(error) T
 		return failed(res.err)
 	}
 
-	return ok(res.ok)
+	return ok(res.ok.(Ok))
 }
 
 func Ok[Ok any](it Ok) *Result[Ok] {
@@ -65,7 +67,7 @@ func Ok[Ok any](it Ok) *Result[Ok] {
 
 func Error[Ok any](err error) *Result[Ok] {
 	return &Result[Ok]{
-		ok:  *new(Ok),
+		ok:  nil,
 		err: err,
 	}
 }
