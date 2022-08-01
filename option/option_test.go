@@ -116,3 +116,85 @@ func TestMatchNone(t *testing.T) {
 
 	assert.Equal(t, expected, matchedOpt)
 }
+
+func TestContains(t *testing.T) {
+	expected := 262
+	opt := Some(expected)
+	optNone := None[int]()
+
+	assert.True(t, Contains(opt, expected))
+	assert.False(t, Contains(optNone, expected))
+}
+
+func TestDefaultValue(t *testing.T) {
+	expectedSome := 357
+	expectedNone := 357
+	some := Some(expectedSome)
+	none := None[int]()
+
+	assert.Equal(t, expectedSome, DefaultValue(some, 42))
+	assert.Equal(t, expectedNone, DefaultValue(none, expectedNone))
+}
+
+func TestDefaultWith(t *testing.T) {
+	expectedSome := 357
+	expectedNone := 0
+	some := Some(expectedSome)
+	none := None[int]()
+
+	assert.Equal(t, expectedSome, DefaultWith(some, func() int { return 0 }))
+	assert.Equal(t, expectedNone, DefaultWith(none, func() int { return 0 }))
+}
+
+func TestExists(t *testing.T) {
+	value := 42
+	opt := Some(value)
+	none := None[int]()
+
+	assert.True(t, Exists(opt, func(i int) bool { return i > 41 }))
+	assert.False(t, Exists(none, func(i int) bool { return i > 41 }))
+}
+
+func TestFilter(t *testing.T) {
+	value := 42
+	opt := Some(value)
+	none := None[int]()
+	predicate := func(i int) bool { return i == 42 }
+
+	filterRetSome := Filter(opt, predicate)
+
+	assert.Same(t, filterRetSome, opt)
+
+	filterRetNone := Filter(none, predicate)
+
+	assert.Equal(t, None[int](), filterRetNone)
+
+}
+
+func TestFold(t *testing.T) {
+	value := 667
+	expected := 777
+	expectedErr := 110
+	res := Some(value)
+	err := None[int]()
+
+	assert.Equal(t, expected, Fold(res, 110, func(s int, i int) int { return s + i }))
+	assert.Equal(t, expectedErr, Fold(err, expectedErr, func(s int, i int) int { return s + 1 }))
+}
+
+func TestIter(t *testing.T) {
+	value := 0
+	expected := 1
+	opt := Some(&value)
+	none := None[*int]()
+	incrementPtr := func(i *int) unit.Unit { *i++; return unit.Unit{} }
+
+	Iter(opt, incrementPtr)
+
+	assert.Equal(t, expected, *(opt.some.(*int)))
+	assert.Same(t, &value, opt.some)
+
+	Iter(none, incrementPtr)
+
+	assert.Nil(t, none.some)
+}

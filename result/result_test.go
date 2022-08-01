@@ -3,6 +3,8 @@ package result
 import (
 	"errors"
 	"fmt"
+	"github.com/MisterKaiou/go-functional/option"
+	"github.com/MisterKaiou/go-functional/unit"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -51,6 +53,28 @@ func TestMapWithError(t *testing.T) {
 	assert.Equal(t, err, mappedRes.err)
 	assert.Equal(t, &err, &mappedRes.err)
 	assert.Nil(t, mappedRes.ok)
+}
+
+func TestMapErrorNoError(t *testing.T) {
+	value := "something"
+	res := Ok(value)
+
+	mapped := MapError(res, func(err error) error { return errors.New("some error") })
+
+	assert.Nil(t, res.err)
+	assert.Equal(t, value, mapped.ok)
+	assert.Same(t, res, mapped)
+}
+
+func TestMapErrorWithError(t *testing.T) {
+	value := errors.New("something failed")
+	res := Error[int](value)
+
+	mapped := MapError(res, func(err error) error { return errors.New(fmt.Sprint("oh no ", err)) })
+
+	assert.NotNil(t, res.err)
+	assert.Equal(t, "oh no something failed", mapped.err.Error())
+	assert.NotSame(t, res, mapped)
 }
 
 func TestBindNoError(t *testing.T) {
@@ -157,4 +181,78 @@ func TestFromTupleOfWithError(t *testing.T) {
 
 	assert.Equal(t, expected, res.err)
 	assert.Nil(t, res.ok)
+}
+
+func TestContains(t *testing.T) {
+	ok := Ok("something")
+	err := Error[string](errors.New("error"))
+
+	assert.True(t, Contains(ok, "something"))
+	assert.False(t, Contains(err, "other thing"))
+}
+
+func TestDefaultValue(t *testing.T) {
+	expectedOk := 357
+	expectedErr := 357
+	ok := Ok(expectedOk)
+	err := Error[int](errors.New("error"))
+
+	assert.Equal(t, expectedOk, DefaultValue(ok, 42))
+	assert.Equal(t, expectedErr, DefaultValue(err, expectedErr))
+}
+
+func TestDefaultWith(t *testing.T) {
+	expectedOk := 357
+	expectedErr := 0
+	ok := Ok(expectedOk)
+	err := Error[int](errors.New("error"))
+
+	assert.Equal(t, expectedOk, DefaultWith(ok, func(_ error) int { return 0 }))
+	assert.Equal(t, expectedErr, DefaultWith(err, func(_ error) int { return 0 }))
+}
+
+func TestExists(t *testing.T) {
+	value := 42
+	res := Ok(value)
+	err := Error[int](errors.New("error"))
+
+	assert.True(t, Exists(res, func(i int) bool { return i > 41 }))
+	assert.False(t, Exists(err, func(i int) bool { return i > 41 }))
+}
+
+func TestFold(t *testing.T) {
+	value := 667
+	expected := 777
+	expectedErr := 110
+	res := Ok(value)
+	err := Error[int](errors.New("error"))
+
+	assert.Equal(t, expected, Fold(res, 110, func(s int, i int) int { return s + i }))
+	assert.Equal(t, expectedErr, Fold(err, expectedErr, func(s int, i int) int { return s + 1 }))
+}
+
+func TestIter(t *testing.T) {
+	value := 0
+	expected := 1
+	res := Ok(&value)
+	err := Error[*int](errors.New("error"))
+	incrementPtr := func(i *int) unit.Unit { *i++; return unit.Unit{} }
+
+	Iter(res, incrementPtr)
+
+	assert.Equal(t, expected, *(res.ok.(*int)))
+	assert.Same(t, &value, res.ok)
+
+	Iter(err, incrementPtr)
+
+	assert.Nil(t, err.ok)
+}
+
+func TestToOption(t *testing.T) {
+	value := 146
+	res := Ok(value)
+	err := Error[int](errors.New("error"))
+
+	assert.Equal(t, option.Some[int](value), ToOption(res))
+	assert.Equal(t, option.None[int](), ToOption(err))
 }
