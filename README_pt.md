@@ -6,6 +6,11 @@ Languages: **PT**, [EN](README.md)
 
 É uma pequena biblioteca em Go que contém a implementação de mônadas (monads) comuns em programação funcional que faz uso do suporte a [generics](https://go.dev/doc/tutorial/generics).
 
+## Como instalar
+```sh
+go get github.com/MisterKaiou/go-functional@v1.0.0
+```
+
 ## Por quê?
 
 A maneira atual de se retornar um valor ou um erro, com uma tupla ` ([valor], error) `, não é muito expansível. Visto que você teria de recorrer ao clássico ` if err != nil { do() } ` para tratar o erro, o que fica rapidamente cansativo.

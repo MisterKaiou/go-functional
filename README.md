@@ -6,6 +6,12 @@ Languages: [PT](README_pt.md), **EN**
 
 It is a small library in Go that contains the implementation of common monads in functional programming that makes use of [generics](https://go.dev/doc/tutorial/generics) support.
 
+## How to install
+
+```sh
+go get github.com/MisterKaiou/go-functional@v1.0.0
+```
+
 ## Why?
 
 The current way of returning a value or an error, with a ` ([value], error) ` tuple, is not very expandable. Since you would have to resort to the classic ` if err != nil { do() } ` to handle the error, which quickly gets tiresome.
