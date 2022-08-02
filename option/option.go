@@ -145,6 +145,16 @@ func Fold[Of, State any](opt Option[Of], state State, folder func(State, Of) Sta
 	return folder(state, opt.some.(Of))
 }
 
+// FoldM applies the folder function, passing the provided state and the Option inner value to it and returns State
+// wrapped in an Option.
+func FoldM[Of, State any](opt Option[Of], state State, folder func(State, Of) State) Option[State] {
+	if opt.IsNone() {
+		return None[State]()
+	}
+
+	return Some(folder(state, opt.some.(Of)))
+}
+
 // Iter applies the given action to the inner value of the Option provided.
 func Iter[Of any](opt Option[Of], action func(it Of) unit.Unit) unit.Unit {
 	if opt.IsNone() {

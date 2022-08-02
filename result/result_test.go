@@ -230,6 +230,23 @@ func TestFold(t *testing.T) {
 	assert.Equal(t, expectedErr, Fold(err, expectedErr, func(s int, i int) int { return s + 1 }))
 }
 
+func TestFoldM(t *testing.T) {
+	value := 667
+	expected := 777
+	res := Ok(value)
+	err := Error[int](errors.New("error"))
+
+	okFoldm := FoldM(res, 110, func(s int, i int) int { return s + i })
+
+	assert.Equal(t, expected, okFoldm.ok)
+	assert.True(t, okFoldm.IsOk())
+
+	errFoldm := FoldM(err, value, func(s int, i int) int { return s + 1 })
+
+	assert.Equal(t, err, errFoldm)
+	assert.True(t, errFoldm.IsError())
+}
+
 func TestIter(t *testing.T) {
 	value := 0
 	expected := 1
@@ -254,4 +271,35 @@ func TestToOption(t *testing.T) {
 
 	assert.Equal(t, option.Some[int](value), ToOption(res))
 	assert.Equal(t, option.None[int](), ToOption(err))
+}
+
+func BenchmarkFoldVsMapVsFoldM(b *testing.B) {
+	b.Run("Fold", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			ok := Ok(0)
+
+			Fold(ok, i, func(st int, it int) int { return st + it })
+		}
+	})
+
+	b.Run("Map", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			ok := Ok(0)
+
+			Map(ok, func(it int) int {
+				return it + i
+			})
+		}
+	})
+
+	b.Run("FoldM", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			ok := Ok(0)
+
+			FoldM(ok, i, func(st int, it int) int { return st + it })
+		}
+	})
 }

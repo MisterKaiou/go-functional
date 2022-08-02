@@ -157,6 +157,16 @@ func Fold[Of, State any](res Result[Of], state State, folder func(State, Of) Sta
 	return folder(state, res.ok.(Of))
 }
 
+// FoldM applies the folder function, passing the provided state and the Result inner value to it and returns State
+// wrapped in a Result.
+func FoldM[Of, State any](res Result[Of], state State, folder func(State, Of) State) Result[State] {
+	if res.IsError() {
+		return Error[State](res.err)
+	}
+
+	return Ok(folder(state, res.ok.(Of)))
+}
+
 // Iter applies the given action to the inner value of the Result provided.
 func Iter[Of any](res Result[Of], action func(it Of) unit.Unit) unit.Unit {
 	if res.IsError() {

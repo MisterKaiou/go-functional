@@ -171,11 +171,27 @@ func TestFold(t *testing.T) {
 	value := 667
 	expected := 777
 	expectedErr := 110
+	some := Some(value)
+	none := None[int]()
+
+	assert.Equal(t, expected, Fold(some, 110, func(s int, i int) int { return s + i }))
+	assert.Equal(t, expectedErr, Fold(none, expectedErr, func(s int, i int) int { return s + 1 }))
+}
+
+func TestFoldM(t *testing.T) {
+	value := 667
+	expected := 777
+	expectedErr := 110
 	res := Some(value)
 	err := None[int]()
 
-	assert.Equal(t, expected, Fold(res, 110, func(s int, i int) int { return s + i }))
-	assert.Equal(t, expectedErr, Fold(err, expectedErr, func(s int, i int) int { return s + 1 }))
+	foldSome := FoldM(res, 110, func(s int, i int) int { return s + i })
+
+	assert.Equal(t, expected, foldSome.some)
+
+	foldNone := FoldM(err, expectedErr, func(s int, i int) int { return s + 1 })
+
+	assert.Equal(t, err, foldNone)
 }
 
 func TestIter(t *testing.T) {
@@ -193,4 +209,33 @@ func TestIter(t *testing.T) {
 	Iter(none, incrementPtr)
 
 	assert.Nil(t, none.some)
+}
+
+func BenchmarkFoldVsMapVsFoldM(b *testing.B) {
+	b.Run("Fold", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			some := Some(0)
+
+			Fold(some, i, func(st int, it int) int { return st + it })
+		}
+	})
+
+	b.Run("Map", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			some := Some(0)
+
+			Map(some, func(it int) int { return it + i })
+		}
+	})
+
+	b.Run("FoldM", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			some := Some(0)
+
+			FoldM(some, i, func(st int, it int) int { return st + it })
+		}
+	})
 }
