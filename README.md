@@ -59,7 +59,7 @@ In order not to prolong the description too much, examples of how to handle *err
 str := result.Ok(42).String() // Same as fmt.String(42)
 print(str) // Prints: "42"
 ```
-- If it is **Error**: String will return `error.String()` in the internal value. Ex:
+- If it is **Error**: String will return `error.Error()` in the internal value. Ex:
 ```go
 str := result.Error[int](errors.New("error")).String() // Same as err.Error()
 print(str) // Prints: error
@@ -85,6 +85,17 @@ mappedRes := result.Map(res, func(val int) bool { return val == 0 }) //*Result[b
 printf("The value of mappedRes is: %s", mappedRes) 
 // Prints: The value of mappedRes is: error"
 ```
+<br/>
+
+**MapError:** Given a *`Result`*, it accepts a function that receives its error and returns another error. Finally, the returned value is stored in a new *`Result`*.
+
+```go
+res := Error[int](errors.New("something failed"))
+
+mapped := MapError(res, func(err error) error { return errors.New(fmt.Sprint("oh no ", err)) })
+println(mapped.String()) // Prints: oh no something failed
+```
+
 <br/>
 
 **Bind:** Given a *`Result`*, it accepts a function that takes its value and returns another *`Result`*.
@@ -199,6 +210,12 @@ res := option.Some(69).Unwrap() // res = 69
 // Ou
 res := option.None[bool]().Unwrap() // Panic
 ```
+
+<br/>
+
+### [*More info on the docs!*](https://pkg.go.dev/github.com/MisterKaiou/go-functional)
+
+<br/>
 
 ## Real Example
 
