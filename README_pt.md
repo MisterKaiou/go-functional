@@ -8,7 +8,7 @@ Languages: **PT**, [EN](README.md)
 
 ## Como instalar
 ```sh
-go get github.com/MisterKaiou/go-functional@v1.1.0
+go get github.com/MisterKaiou/go-functional
 ```
 
 ## Por quê?
