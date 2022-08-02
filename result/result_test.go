@@ -63,7 +63,6 @@ func TestMapErrorNoError(t *testing.T) {
 
 	assert.Nil(t, res.err)
 	assert.Equal(t, value, mapped.ok)
-	assert.Same(t, res, mapped)
 }
 
 func TestMapErrorWithError(t *testing.T) {
@@ -81,7 +80,7 @@ func TestBindNoError(t *testing.T) {
 	value := 42
 	res := Ok(value)
 
-	boundRes := Bind(res, func(val int) *Result[string] { return Ok(fmt.Sprint(val)) })
+	boundRes := Bind(res, func(val int) Result[string] { return Ok(fmt.Sprint(val)) })
 
 	assert.Equal(t, "42", boundRes.ok)
 	assert.Nil(t, boundRes.err)
@@ -91,7 +90,7 @@ func TestBindWithError(t *testing.T) {
 	err := errors.New("some error")
 	res := Error[int](err)
 
-	boundRes := Bind(res, func(val int) *Result[bool] { return Ok(val == 0) })
+	boundRes := Bind(res, func(val int) Result[bool] { return Ok(val == 0) })
 
 	assert.Equal(t, err, boundRes.err)
 	assert.Equal(t, &err, &boundRes.err)

@@ -5,20 +5,18 @@ import (
 	"github.com/MisterKaiou/go-functional/unit"
 )
 
-type none unit.Unit
 type some[Of any] any
 
 // Option represents a value that can be either something or nothing.
 type Option[Of any] struct {
-	none *none
 	some some[Of]
 }
 
 func (o *Option[Of]) IsSome() bool {
-	return o.none == nil
+	return o.some != nil
 }
 
-func IsSome[Of any](o *Option[Of]) bool {
+func IsSome[Of any](o Option[Of]) bool {
 	return o.IsSome()
 }
 
@@ -26,7 +24,7 @@ func (o *Option[Of]) IsNone() bool {
 	return !o.IsSome()
 }
 
-func IsNone[Of any](o *Option[Of]) bool {
+func IsNone[Of any](o Option[Of]) bool {
 	return o.IsNone()
 }
 
@@ -50,7 +48,7 @@ func (o *Option[Of]) Unwrap() Of {
 }
 
 // Map applies the mapping function on the option's internal value if it is Some, and returns a new Option.
-func Map[Of any, To any](opt *Option[Of], mapping func(Of) To) *Option[To] {
+func Map[Of any, To any](opt Option[Of], mapping func(Of) To) Option[To] {
 	if opt.IsNone() {
 		return None[To]()
 	}
@@ -59,7 +57,7 @@ func Map[Of any, To any](opt *Option[Of], mapping func(Of) To) *Option[To] {
 }
 
 // Bind accepts a function that takes the Option internal value and returns another Option
-func Bind[Of any, To any](opt *Option[Of], binding func(Of) *Option[To]) *Option[To] {
+func Bind[Of any, To any](opt Option[Of], binding func(Of) Option[To]) Option[To] {
 	if opt.IsNone() {
 		return None[To]()
 	}
@@ -69,7 +67,7 @@ func Bind[Of any, To any](opt *Option[Of], binding func(Of) *Option[To]) *Option
 
 // Match accepts two functions that return a value of the same type, but the first one receives the value stored in
 // the given Option and the second one receives no parameters.
-func Match[Of any, To any](opt *Option[Of], ok func(Of) To, failed func() To) To {
+func Match[Of any, To any](opt Option[Of], ok func(Of) To, failed func() To) To {
 	if opt.IsNone() {
 		return failed()
 	}
@@ -78,19 +76,19 @@ func Match[Of any, To any](opt *Option[Of], ok func(Of) To, failed func() To) To
 }
 
 // Some creates a new Option representing Some state
-func Some[Of any](it Of) *Option[Of] {
-	return &Option[Of]{
+func Some[Of any](it Of) Option[Of] {
+	return Option[Of]{
 		some: it,
 	}
 }
 
 // None creates a new Option representing None state
-func None[Of any]() *Option[Of] {
-	return &Option[Of]{none: &none{}}
+func None[Of any]() Option[Of] {
+	return Option[Of]{}
 }
 
 // Contains compare the content of the provided Option against the given expected value.
-func Contains[Of comparable](opt *Option[Of], expected Of) bool {
+func Contains[Of comparable](opt Option[Of], expected Of) bool {
 	if opt.IsNone() {
 		return false
 	}
@@ -99,7 +97,7 @@ func Contains[Of comparable](opt *Option[Of], expected Of) bool {
 }
 
 // DefaultValue returns the inner value of this Option or the provided default value.
-func DefaultValue[Of any](opt *Option[Of], or Of) Of {
+func DefaultValue[Of any](opt Option[Of], or Of) Of {
 	if opt.IsNone() {
 		return or
 	}
@@ -108,7 +106,7 @@ func DefaultValue[Of any](opt *Option[Of], or Of) Of {
 }
 
 // DefaultWith returns the inner value of this Option or executes the provided function
-func DefaultWith[Of any](opt *Option[Of], def func() Of) Of {
+func DefaultWith[Of any](opt Option[Of], def func() Of) Of {
 	if opt.IsNone() {
 		return def()
 	}
@@ -117,7 +115,7 @@ func DefaultWith[Of any](opt *Option[Of], def func() Of) Of {
 }
 
 // Exists tests the Option inner value against the given predicate.
-func Exists[Of any](opt *Option[Of], predicate func(Of) bool) bool {
+func Exists[Of any](opt Option[Of], predicate func(Of) bool) bool {
 	if opt.IsNone() {
 		return false
 	}
@@ -126,7 +124,7 @@ func Exists[Of any](opt *Option[Of], predicate func(Of) bool) bool {
 }
 
 // Filter returns Some if the Option inner value satisfies the condition, else returns None
-func Filter[Of any](opt *Option[Of], predicate func(Of) bool) *Option[Of] {
+func Filter[Of any](opt Option[Of], predicate func(Of) bool) Option[Of] {
 	if opt.IsNone() {
 		return opt
 	}
@@ -139,7 +137,7 @@ func Filter[Of any](opt *Option[Of], predicate func(Of) bool) *Option[Of] {
 }
 
 // Fold applies the folder function, passing the provided state and the Option inner value to it and returns State.
-func Fold[Of, State any](opt *Option[Of], state State, folder func(State, Of) State) State {
+func Fold[Of, State any](opt Option[Of], state State, folder func(State, Of) State) State {
 	if opt.IsNone() {
 		return state
 	}
@@ -148,7 +146,7 @@ func Fold[Of, State any](opt *Option[Of], state State, folder func(State, Of) St
 }
 
 // Iter applies the given action to the inner value of the Option provided.
-func Iter[Of any](opt *Option[Of], action func(it Of) unit.Unit) unit.Unit {
+func Iter[Of any](opt Option[Of], action func(it Of) unit.Unit) unit.Unit {
 	if opt.IsNone() {
 		return unit.Unit{}
 	}

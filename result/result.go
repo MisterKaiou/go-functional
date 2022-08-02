@@ -28,7 +28,7 @@ func (r *Result[Ok]) IsOk() bool {
 	return r.err == nil
 }
 
-func IsOk[Of any](res *Result[Of]) bool {
+func IsOk[Of any](res Result[Of]) bool {
 	return res.IsOk()
 }
 
@@ -36,7 +36,7 @@ func (r *Result[Ok]) IsError() bool {
 	return !r.IsOk()
 }
 
-func IsError[Of any](res *Result[Of]) bool {
+func IsError[Of any](res Result[Of]) bool {
 	return res.IsError()
 }
 
@@ -50,7 +50,7 @@ func (r *Result[Ok]) Unwrap() Ok {
 }
 
 // Map applies the mapping function on the result's internal value if is not an error, and returns a new result.
-func Map[From any, To any](res *Result[From], mapping func(From) To) *Result[To] {
+func Map[From any, To any](res Result[From], mapping func(From) To) Result[To] {
 	if res.IsError() {
 		return Error[To](res.err)
 	}
@@ -60,7 +60,7 @@ func Map[From any, To any](res *Result[From], mapping func(From) To) *Result[To]
 
 // MapError applies the given mapping function on the result's internal error, if it is an error, and returns a new
 // result, else returns the same instance provided.
-func MapError[Of any](res *Result[Of], mapping func(error) error) *Result[Of] {
+func MapError[Of any](res Result[Of], mapping func(error) error) Result[Of] {
 	if res.IsError() {
 		return Error[Of](mapping(res.err))
 	}
@@ -69,7 +69,7 @@ func MapError[Of any](res *Result[Of], mapping func(error) error) *Result[Of] {
 }
 
 // Bind accepts a function that takes the Result internal value and returns another Result
-func Bind[From any, To any](res *Result[From], binding func(From) *Result[To]) *Result[To] {
+func Bind[From any, To any](res Result[From], binding func(From) Result[To]) Result[To] {
 	if res.IsError() {
 		return Error[To](res.err)
 	}
@@ -79,7 +79,7 @@ func Bind[From any, To any](res *Result[From], binding func(From) *Result[To]) *
 
 // Match accepts two functions that return a value of the same type, but the first one receives the result
 // contained in it and the second one receives the error.
-func Match[Ok any, To any](res *Result[Ok], ok func(Ok) To, failed func(error) To) To {
+func Match[Ok any, To any](res Result[Ok], ok func(Ok) To, failed func(error) To) To {
 	if res.IsError() {
 		return failed(res.err)
 	}
@@ -88,23 +88,23 @@ func Match[Ok any, To any](res *Result[Ok], ok func(Ok) To, failed func(error) T
 }
 
 // Ok creates a new Result representing an Ok state.
-func Ok[Ok any](it Ok) *Result[Ok] {
-	return &Result[Ok]{
+func Ok[Ok any](it Ok) Result[Ok] {
+	return Result[Ok]{
 		ok:  it,
 		err: nil,
 	}
 }
 
 // Error create a new Result that represents an Error state.
-func Error[Ok any](err error) *Result[Ok] {
-	return &Result[Ok]{
+func Error[Ok any](err error) Result[Ok] {
+	return Result[Ok]{
 		ok:  nil,
 		err: err,
 	}
 }
 
 // FromTupleOf creates a new Result base on the values provided. If err is not nil, this result will represent an error.
-func FromTupleOf[Of any](it Of, err error) *Result[Of] {
+func FromTupleOf[Of any](it Of, err error) Result[Of] {
 	if err != nil {
 		return Error[Of](err)
 	}
@@ -113,7 +113,7 @@ func FromTupleOf[Of any](it Of, err error) *Result[Of] {
 }
 
 // Contains compare the content of the provided Result against the given expected value.
-func Contains[Of comparable](res *Result[Of], expected Of) bool {
+func Contains[Of comparable](res Result[Of], expected Of) bool {
 	if res.IsError() {
 		return false
 	}
@@ -122,7 +122,7 @@ func Contains[Of comparable](res *Result[Of], expected Of) bool {
 }
 
 // DefaultValue returns the inner value of this Result or the provided default value.
-func DefaultValue[Of any](res *Result[Of], or Of) Of {
+func DefaultValue[Of any](res Result[Of], or Of) Of {
 	if res.IsError() {
 		return or
 	}
@@ -131,7 +131,7 @@ func DefaultValue[Of any](res *Result[Of], or Of) Of {
 }
 
 // DefaultWith returns the inner value of this Result or executes the provided function with its inner error.
-func DefaultWith[Of any](res *Result[Of], def func(error) Of) Of {
+func DefaultWith[Of any](res Result[Of], def func(error) Of) Of {
 	if res.IsError() {
 		return def(res.err)
 	}
@@ -140,7 +140,7 @@ func DefaultWith[Of any](res *Result[Of], def func(error) Of) Of {
 }
 
 // Exists tests the Result inner value against the given predicate.
-func Exists[Of any](res *Result[Of], predicate func(Of) bool) bool {
+func Exists[Of any](res Result[Of], predicate func(Of) bool) bool {
 	if res.IsError() {
 		return false
 	}
@@ -149,7 +149,7 @@ func Exists[Of any](res *Result[Of], predicate func(Of) bool) bool {
 }
 
 // Fold applies the folder function, passing the provided state and the Result inner value to it and returns State.
-func Fold[Of, State any](res *Result[Of], state State, folder func(State, Of) State) State {
+func Fold[Of, State any](res Result[Of], state State, folder func(State, Of) State) State {
 	if res.IsError() {
 		return state
 	}
@@ -158,7 +158,7 @@ func Fold[Of, State any](res *Result[Of], state State, folder func(State, Of) St
 }
 
 // Iter applies the given action to the inner value of the Result provided.
-func Iter[Of any](res *Result[Of], action func(it Of) unit.Unit) unit.Unit {
+func Iter[Of any](res Result[Of], action func(it Of) unit.Unit) unit.Unit {
 	if res.IsError() {
 		return unit.Unit{}
 	}
@@ -168,7 +168,7 @@ func Iter[Of any](res *Result[Of], action func(it Of) unit.Unit) unit.Unit {
 
 // ToOption creates an Option from the given Result. If error, the returned Option will be None, else Some with the inner
 // value.
-func ToOption[Of any](res *Result[Of]) *option.Option[Of] {
+func ToOption[Of any](res Result[Of]) option.Option[Of] {
 	if res.IsError() {
 		return option.None[Of]()
 	}

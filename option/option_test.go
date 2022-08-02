@@ -22,7 +22,6 @@ func TestStringNone(t *testing.T) {
 func TestNone(t *testing.T) {
 	opt := None[unit.Unit]()
 
-	assert.NotNil(t, opt.none)
 	assert.Nil(t, opt.some)
 }
 
@@ -37,7 +36,6 @@ func TestSome(t *testing.T) {
 	opt := Some(value)
 
 	assert.Equal(t, value, opt.some)
-	assert.Nil(t, opt.none)
 }
 
 func TestIsSome(t *testing.T) {
@@ -80,19 +78,17 @@ func TestBindSome(t *testing.T) {
 	value := 42
 	opt := Some(value)
 
-	boundRes := Bind(opt, func(val int) *Option[string] { return Some(fmt.Sprint(val)) })
+	boundRes := Bind(opt, func(val int) Option[string] { return Some(fmt.Sprint(val)) })
 
 	assert.Equal(t, "42", boundRes.some)
-	assert.Nil(t, boundRes.none)
 }
 
 func TestBindNone(t *testing.T) {
 	opt := None[int]()
 
-	boundRes := Bind(opt, func(val int) *Option[string] { return Some(fmt.Sprint(val)) })
+	boundRes := Bind(opt, func(val int) Option[string] { return Some(fmt.Sprint(val)) })
 
 	assert.Nil(t, boundRes.some)
-	assert.NotNil(t, boundRes.none)
 }
 
 func TestMatchSome(t *testing.T) {
@@ -163,7 +159,7 @@ func TestFilter(t *testing.T) {
 
 	filterRetSome := Filter(opt, predicate)
 
-	assert.Same(t, filterRetSome, opt)
+	assert.Equal(t, filterRetSome, opt)
 
 	filterRetNone := Filter(none, predicate)
 
