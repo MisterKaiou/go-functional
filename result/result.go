@@ -176,6 +176,14 @@ func Iter[Of any](res Result[Of], action func(it Of) unit.Unit) unit.Unit {
 	return action(res.ok.(Of))
 }
 
+func Flatten[Of any](res Result[Result[Of]]) Result[Of] {
+	if res.IsError() {
+		return Error[Of](res.err)
+	}
+
+	return res.ok.(Result[Of])
+}
+
 // ToOption creates an Option from the given Result. If error, the returned Option will be None, else Some with the inner
 // value.
 func ToOption[Of any](res Result[Of]) option.Option[Of] {

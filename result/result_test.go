@@ -3,9 +3,10 @@ package result
 import (
 	"errors"
 	"fmt"
+	"testing"
+
 	"github.com/MisterKaiou/go-functional/option"
 	"github.com/MisterKaiou/go-functional/unit"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -262,6 +263,32 @@ func TestIter(t *testing.T) {
 	Iter(err, incrementPtr)
 
 	assert.Nil(t, err.ok)
+}
+
+func TestFlatten(t *testing.T) {
+	toFlatten := Ok(Ok(42))
+	expectedOk := Ok(42)
+
+	flattenRes := Flatten(toFlatten)
+
+	assert.Equal(t, expectedOk, flattenRes)
+}
+
+func TestFlattenError(t *testing.T) {
+	err := errors.New("error")
+	okErr := Ok(Error[int](err))
+
+	inner := Flatten(okErr)
+
+	assert.True(t, okErr.IsOk())
+	assert.True(t, inner.IsError())
+
+	errErr := Error[Result[int]](err)
+
+	inner = Flatten(errErr)
+
+	assert.True(t, inner.IsError())
+	assert.Same(t, inner.err, err)
 }
 
 func TestToOption(t *testing.T) {
