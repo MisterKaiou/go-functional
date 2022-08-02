@@ -9,7 +9,7 @@ It is a small library in Go that contains the implementation of common monads in
 ## How to install
 
 ```sh
-go get github.com/MisterKaiou/go-functional@v1.0.0
+go get github.com/MisterKaiou/go-functional@v1.1.0
 ```
 
 ## Why?
