@@ -149,13 +149,22 @@ func Exists[Of any](res Result[Of], predicate func(Of) bool) bool {
 	return predicate(res.ok.(Of))
 }
 
-// Fold applies the folder function, passing the provided state and the Result inner value to it and returns State.
+// Fold applies the folder function passing the provided state and the Result inner value to it and returns the updated State.
 func Fold[Of, State any](res Result[Of], state State, folder func(State, Of) State) State {
 	if res.IsError() {
 		return state
 	}
 
 	return folder(state, res.ok.(Of))
+}
+
+// FoldTo applies the folder function passing the provided state and the Result inner value and returns a new value from it.
+func FoldTo[Of, State, To any](res Result[Of], state State, folder func(State, Of) To) Result[To] {
+	if res.IsError() {
+		return Error[To](res.err)
+	}
+
+	return Ok(folder(state, res.ok.(Of)))
 }
 
 // FoldM applies the folder function, passing the provided state and the Result inner value to it and returns State

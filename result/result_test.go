@@ -231,6 +231,17 @@ func TestFold(t *testing.T) {
 	assert.Equal(t, expectedErr, Fold(err, expectedErr, func(s int, i int) int { return s + 1 }))
 }
 
+func TestFoldTo(t *testing.T) {
+	res := Ok(3500)
+	expected := "Number is: 3500"
+
+	foldedResult := Fold(res, "Number is: ", func(s string, i int) string {
+		return fmt.Sprint(s, i)
+	})
+
+	assert.Equal(t, expected, foldedResult)
+}
+
 func TestFoldM(t *testing.T) {
 	value := 667
 	expected := 777
