@@ -2,6 +2,7 @@ package result
 
 import (
 	"fmt"
+
 	"github.com/MisterKaiou/go-functional/option"
 	"github.com/MisterKaiou/go-functional/unit"
 )
@@ -176,6 +177,7 @@ func Iter[Of any](res Result[Of], action func(it Of) unit.Unit) unit.Unit {
 	return action(res.ok.(Of))
 }
 
+// Flatten returns a Result from a Result of Result.
 func Flatten[Of any](res Result[Result[Of]]) Result[Of] {
 	if res.IsError() {
 		return Error[Of](res.err)
