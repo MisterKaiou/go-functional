@@ -145,6 +145,15 @@ func Fold[Of, State any](opt Option[Of], state State, folder func(State, Of) Sta
 	return folder(state, opt.some.(Of))
 }
 
+// FoldTo applies the folder function passing the provided state and the Option inner value and returns a new value from it.
+func FoldTo[Of, State, To any](opt Option[Of], state State, folder func(State, Of) To) Option[To] {
+	if opt.IsNone() {
+		return None[To]()
+	}
+
+	return Some(folder(state, opt.some.(Of)))
+}
+
 // FoldM applies the folder function, passing the provided state and the Option inner value to it and returns State
 // wrapped in an Option.
 func FoldM[Of, State any](opt Option[Of], state State, folder func(State, Of) State) Option[State] {
@@ -153,6 +162,28 @@ func FoldM[Of, State any](opt Option[Of], state State, folder func(State, Of) St
 	}
 
 	return Some(folder(state, opt.some.(Of)))
+}
+
+// CombineBy applies the combiner function on State and the current Result by unwrapping them.
+func CombineBy[It, With, To any](opt Option[It], state Option[With], combiner func(With, It) To) Option[To] {
+	if opt.IsNone() {
+		return None[To]()
+	}
+
+	if state.IsNone() {
+		return None[To]()
+	}
+
+	return Some(combiner(state.some.(With), opt.some.(It)))
+}
+
+// Flatten returns a Result from a Result of Result.
+func Flatten[Of any](opt Option[Option[Of]]) Option[Of] {
+	if opt.IsNone() {
+		return None[Of]()
+	}
+
+	return opt.some.(Option[Of])
 }
 
 // Iter applies the given action to the inner value of the Option provided.

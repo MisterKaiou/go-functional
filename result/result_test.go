@@ -271,6 +271,29 @@ func TestCombineByNoError(t *testing.T) {
 	assert.True(t, combined.ok.(bool))
 }
 
+func TestCombineByWithError(t *testing.T) {
+	err := errors.New("some error")
+	combiningFunc := func(s string, i int) bool {
+		return s == "nice" || i == 42
+	}
+
+	left := Error[int](err)
+	right := Ok("nice")
+
+	combined := CombineBy(left, right, combiningFunc)
+
+	assert.True(t, combined.IsError())
+	assert.Same(t, err, combined.err)
+
+	left = Ok(69)
+	right = Error[string](err)
+
+	combined = CombineBy(left, right, combiningFunc)
+
+	assert.True(t, combined.IsError())
+	assert.Same(t, err, combined.err)
+}
+
 func TestIter(t *testing.T) {
 	value := 0
 	expected := 1

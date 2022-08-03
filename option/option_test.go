@@ -178,6 +178,17 @@ func TestFold(t *testing.T) {
 	assert.Equal(t, expectedErr, Fold(none, expectedErr, func(s int, i int) int { return s + 1 }))
 }
 
+func TestFoldTo(t *testing.T) {
+	res := Some(3500)
+	expected := "Number is: 3500"
+
+	foldedResult := Fold(res, "Number is: ", func(s string, i int) string {
+		return fmt.Sprint(s, i)
+	})
+
+	assert.Equal(t, expected, foldedResult)
+}
+
 func TestFoldM(t *testing.T) {
 	value := 667
 	expected := 777
@@ -192,6 +203,65 @@ func TestFoldM(t *testing.T) {
 	foldNone := FoldM(err, expectedErr, func(s int, i int) int { return s + 1 })
 
 	assert.Equal(t, err, foldNone)
+}
+
+func TestCombineByNoError(t *testing.T) {
+	left := Some(42)
+	right := Some("nice")
+
+	combined := CombineBy(left, right, func(s string, i int) bool {
+		return s == "nice" || i == 42
+	})
+
+	assert.True(t, combined.IsSome())
+	assert.True(t, combined.some.(bool))
+}
+
+func TestCombineByWithError(t *testing.T) {
+	combiningFunc := func(s string, i int) bool {
+		return s == "nice" || i == 42
+	}
+
+	left := None[int]()
+	right := Some("nice")
+
+	combined := CombineBy(left, right, combiningFunc)
+
+	assert.True(t, combined.IsNone())
+	assert.Nil(t, combined.some)
+
+	left = Some(69)
+	right = None[string]()
+
+	combined = CombineBy(left, right, combiningFunc)
+
+	assert.True(t, combined.IsNone())
+	assert.Nil(t, combined.some)
+
+}
+
+func TestFlatten(t *testing.T) {
+	toFlatten := Some(Some(42))
+	expectedSome := Some(42)
+
+	flattenRes := Flatten(toFlatten)
+
+	assert.Equal(t, expectedSome, flattenRes)
+}
+
+func TestFlattenError(t *testing.T) {
+	okErr := Some(None[int]())
+
+	inner := Flatten(okErr)
+
+	assert.True(t, okErr.IsSome())
+	assert.True(t, inner.IsNone())
+
+	errErr := None[Option[int]]()
+
+	inner = Flatten(errErr)
+
+	assert.True(t, inner.IsNone())
 }
 
 func TestIter(t *testing.T) {
