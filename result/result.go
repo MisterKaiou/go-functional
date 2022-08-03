@@ -168,6 +168,19 @@ func FoldM[Of, State any](res Result[Of], state State, folder func(State, Of) St
 	return Ok(folder(state, res.ok.(Of)))
 }
 
+// CombineBy applies the combiner function on State and the current Result by unwrapping them.
+func CombineBy[It, With, To any](res Result[It], state Result[With], combiner func(With, It) To) Result[To] {
+	if res.IsError() {
+		return Error[To](res.err)
+	}
+
+	if state.IsError() {
+		return Error[To](state.err)
+	}
+
+	return Ok(combiner(state.ok.(With), res.ok.(It)))
+}
+
 // Iter applies the given action to the inner value of the Result provided.
 func Iter[Of any](res Result[Of], action func(it Of) unit.Unit) unit.Unit {
 	if res.IsError() {

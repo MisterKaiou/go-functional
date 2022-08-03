@@ -248,6 +248,18 @@ func TestFoldM(t *testing.T) {
 	assert.True(t, errFoldm.IsError())
 }
 
+func TestCombineByNoError(t *testing.T) {
+	left := Ok(42)
+	right := Ok("nice")
+
+	combined := CombineBy(left, right, func(s string, i int) bool {
+		return s == "nice" || i == 42
+	})
+
+	assert.True(t, combined.IsOk())
+	assert.True(t, combined.ok.(bool))
+}
+
 func TestIter(t *testing.T) {
 	value := 0
 	expected := 1
