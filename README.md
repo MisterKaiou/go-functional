@@ -21,14 +21,12 @@ Of course, in functional languages this would hardly be a problem as the entire 
 ## Behavior
 
 ### Result
-- Every `Result` returned is a pointer (`*Result`);
 - The value of *Ok* for an error `Result` is `nil`;
 - The value of *Ok* for a successful `Result` is the value it holds;
 - The *error* value for an error `Result` is the error that was used to create it;
 - The *error* value for a successful `Result` is `nil`.
 
 ### Option
-- Every `Option` returned is a pointer (`*Option`);
 - The value of *Some* for an `Option` representing nothing is `nil`;
 - The value of *Some* for an `Option` that represents something is the value it holds;
 - The value of *None* for an `Option` representing nothing is a pointer to a newly created instance of `None`

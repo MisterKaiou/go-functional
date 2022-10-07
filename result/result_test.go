@@ -81,7 +81,7 @@ func TestBindNoError(t *testing.T) {
 	value := 42
 	res := Ok(value)
 
-	boundRes := Bind(res, func(val int) Result[string] { return Ok(fmt.Sprint(val)) })
+	boundRes := Bind(res, func(val int) Of[string] { return Ok(fmt.Sprint(val)) })
 
 	assert.Equal(t, "42", boundRes.ok)
 	assert.Nil(t, boundRes.err)
@@ -91,7 +91,7 @@ func TestBindWithError(t *testing.T) {
 	err := errors.New("some error")
 	res := Error[int](err)
 
-	boundRes := Bind(res, func(val int) Result[bool] { return Ok(val == 0) })
+	boundRes := Bind(res, func(val int) Of[bool] { return Ok(val == 0) })
 
 	assert.Equal(t, err, boundRes.err)
 	assert.Equal(t, &err, &boundRes.err)
@@ -329,7 +329,7 @@ func TestFlattenError(t *testing.T) {
 	assert.True(t, okErr.IsOk())
 	assert.True(t, inner.IsError())
 
-	errErr := Error[Result[int]](err)
+	errErr := Error[Of[int]](err)
 
 	inner = Flatten(errErr)
 

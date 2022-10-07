@@ -78,7 +78,7 @@ func TestBindSome(t *testing.T) {
 	value := 42
 	opt := Some(value)
 
-	boundRes := Bind(opt, func(val int) Option[string] { return Some(fmt.Sprint(val)) })
+	boundRes := Bind(opt, func(val int) Of[string] { return Some(fmt.Sprint(val)) })
 
 	assert.Equal(t, "42", boundRes.some)
 }
@@ -86,7 +86,7 @@ func TestBindSome(t *testing.T) {
 func TestBindNone(t *testing.T) {
 	opt := None[int]()
 
-	boundRes := Bind(opt, func(val int) Option[string] { return Some(fmt.Sprint(val)) })
+	boundRes := Bind(opt, func(val int) Of[string] { return Some(fmt.Sprint(val)) })
 
 	assert.Nil(t, boundRes.some)
 }
@@ -257,7 +257,7 @@ func TestFlattenError(t *testing.T) {
 	assert.True(t, okErr.IsSome())
 	assert.True(t, inner.IsNone())
 
-	errErr := None[Option[int]]()
+	errErr := None[Of[int]]()
 
 	inner = Flatten(errErr)
 

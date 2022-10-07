@@ -7,30 +7,30 @@ import (
 
 type some[Of any] any
 
-// Option represents a value that can be either something or nothing.
-type Option[Of any] struct {
-	some some[Of]
+// Of represents a value that can be either something or nothing.
+type Of[T any] struct {
+	some some[T]
 }
 
-func (o *Option[Of]) IsSome() bool {
+func (o *Of[T]) IsSome() bool {
 	return o.some != nil
 }
 
-func IsSome[Of any](o Option[Of]) bool {
+func IsSome[T any](o Of[T]) bool {
 	return o.IsSome()
 }
 
-func (o *Option[Of]) IsNone() bool {
+func (o *Of[T]) IsNone() bool {
 	return !o.IsSome()
 }
 
-func IsNone[Of any](o Option[Of]) bool {
+func IsNone[T any](o Of[T]) bool {
 	return o.IsNone()
 }
 
 // The value returned when calling this method depends on the state it represents. If Some return fmt.String applied to
 // its internal value; else returns "None"
-func (o *Option[Of]) String() string {
+func (o *Of[T]) String() string {
 	if o.IsNone() {
 		return "None"
 	}
@@ -39,133 +39,133 @@ func (o *Option[Of]) String() string {
 }
 
 // Unwrap Can panic if this Result is an error. Prefer Match over this
-func (o *Option[Of]) Unwrap() Of {
+func (o *Of[T]) Unwrap() T {
 	if o.IsNone() {
 		panic("cannot get the value of nothing (none)")
 	}
 
-	return o.some.(Of)
+	return o.some.(T)
 }
 
-// Map applies the mapping function on the option's internal value if it is Some, and returns a new Option.
-func Map[Of any, To any](opt Option[Of], mapping func(Of) To) Option[To] {
+// Map applies the mapping function on the option's internal value if it is Some, and returns a new Of.
+func Map[T any, To any](opt Of[T], mapping func(T) To) Of[To] {
 	if opt.IsNone() {
 		return None[To]()
 	}
 
-	return Some(mapping(opt.some.(Of)))
+	return Some(mapping(opt.some.(T)))
 }
 
-// Bind accepts a function that takes the Option internal value and returns another Option
-func Bind[Of any, To any](opt Option[Of], binding func(Of) Option[To]) Option[To] {
+// Bind accepts a function that takes the Of internal value and returns another Of
+func Bind[T any, To any](opt Of[T], binding func(T) Of[To]) Of[To] {
 	if opt.IsNone() {
 		return None[To]()
 	}
 
-	return binding(opt.some.(Of))
+	return binding(opt.some.(T))
 }
 
 // Match accepts two functions that return a value of the same type, but the first one receives the value stored in
-// the given Option and the second one receives no parameters.
-func Match[Of any, To any](opt Option[Of], ok func(Of) To, failed func() To) To {
+// the given Of and the second one receives no parameters.
+func Match[T any, To any](opt Of[T], ok func(T) To, failed func() To) To {
 	if opt.IsNone() {
 		return failed()
 	}
 
-	return ok(opt.some.(Of))
+	return ok(opt.some.(T))
 }
 
-// Some creates a new Option representing Some state
-func Some[Of any](it Of) Option[Of] {
-	return Option[Of]{
+// Some creates a new Of representing Some state
+func Some[T any](it T) Of[T] {
+	return Of[T]{
 		some: it,
 	}
 }
 
-// None creates a new Option representing None state
-func None[Of any]() Option[Of] {
-	return Option[Of]{}
+// None creates a new Of representing None state
+func None[T any]() Of[T] {
+	return Of[T]{}
 }
 
-// Contains compare the content of the provided Option against the given expected value.
-func Contains[Of comparable](opt Option[Of], expected Of) bool {
+// Contains compare the content of the provided Of against the given expected value.
+func Contains[T comparable](opt Of[T], expected T) bool {
 	if opt.IsNone() {
 		return false
 	}
 
-	return opt.some.(Of) == expected
+	return opt.some.(T) == expected
 }
 
-// DefaultValue returns the inner value of this Option or the provided default value.
-func DefaultValue[Of any](opt Option[Of], or Of) Of {
+// DefaultValue returns the inner value of this Of or the provided default value.
+func DefaultValue[T any](opt Of[T], or T) T {
 	if opt.IsNone() {
 		return or
 	}
 
-	return opt.some.(Of)
+	return opt.some.(T)
 }
 
-// DefaultWith returns the inner value of this Option or executes the provided function
-func DefaultWith[Of any](opt Option[Of], def func() Of) Of {
+// DefaultWith returns the inner value of this Of or executes the provided function
+func DefaultWith[T any](opt Of[T], def func() T) T {
 	if opt.IsNone() {
 		return def()
 	}
 
-	return opt.some.(Of)
+	return opt.some.(T)
 }
 
-// Exists tests the Option inner value against the given predicate.
-func Exists[Of any](opt Option[Of], predicate func(Of) bool) bool {
+// Exists tests the Of inner value against the given predicate.
+func Exists[T any](opt Of[T], predicate func(T) bool) bool {
 	if opt.IsNone() {
 		return false
 	}
 
-	return predicate(opt.some.(Of))
+	return predicate(opt.some.(T))
 }
 
-// Filter returns Some if the Option inner value satisfies the condition, else returns None
-func Filter[Of any](opt Option[Of], predicate func(Of) bool) Option[Of] {
+// Filter returns Some if the Of inner value satisfies the condition, else returns None
+func Filter[T any](opt Of[T], predicate func(T) bool) Of[T] {
 	if opt.IsNone() {
 		return opt
 	}
 
-	if !predicate(opt.some.(Of)) {
-		return None[Of]()
+	if !predicate(opt.some.(T)) {
+		return None[T]()
 	}
 
 	return opt
 }
 
-// Fold applies the folder function, passing the provided state and the Option inner value to it and returns State.
-func Fold[Of, State any](opt Option[Of], state State, folder func(State, Of) State) State {
+// Fold applies the folder function, passing the provided state and the Of inner value to it and returns State.
+func Fold[T, State any](opt Of[T], state State, folder func(State, T) State) State {
 	if opt.IsNone() {
 		return state
 	}
 
-	return folder(state, opt.some.(Of))
+	return folder(state, opt.some.(T))
 }
 
-// FoldTo applies the folder function passing the provided state and the Option inner value and returns a new value from it.
-func FoldTo[Of, State, To any](opt Option[Of], state State, folder func(State, Of) To) Option[To] {
+// FoldTo applies the folder function passing the provided state and the Of inner value and returns a new value from it.
+func FoldTo[T, State, To any](opt Of[T], state State, folder func(State, T) To) Of[To] {
 	if opt.IsNone() {
 		return None[To]()
 	}
 
-	return Some(folder(state, opt.some.(Of)))
+	return Some(folder(state, opt.some.(T)))
 }
 
-// FoldM applies the folder function, passing the provided state and the Option inner value to it and returns State
-// wrapped in an Option.
-func FoldM[Of, State any](opt Option[Of], state State, folder func(State, Of) State) Option[State] {
+// FoldM applies the folder function, passing the provided state and the Of inner value to it and returns State
+// wrapped in an Of.
+func FoldM[T, State any](opt Of[T], state State, folder func(State, T) State) Of[State] {
 	if opt.IsNone() {
 		return None[State]()
 	}
 
-	return Some(folder(state, opt.some.(Of)))
+	return Some(folder(state, opt.some.(T)))
 }
 
 // CombineBy applies the combiner function on State and the current Result by unwrapping them.
-func CombineBy[It, With, To any](opt Option[It], state Option[With], combiner func(With, It) To) Option[To] {
+func CombineBy[It, With, To any](opt Of[It], state Of[With], combiner func(With, It) To) Of[To] {
 	if opt.IsNone() {
 		return None[To]()
 	}
@@ -178,19 +178,19 @@ func CombineBy[It, With, To any](opt Option[It], state Option[With], combiner fu
 }
 
 // Flatten returns a Result from a Result of Result.
-func Flatten[Of any](opt Option[Option[Of]]) Option[Of] {
+func Flatten[T any](opt Of[Of[T]]) Of[T] {
 	if opt.IsNone() {
-		return None[Of]()
+		return None[T]()
 	}
 
-	return opt.some.(Option[Of])
+	return opt.some.(Of[T])
 }
 
-// Iter applies the given action to the inner value of the Option provided.
-func Iter[Of any](opt Option[Of], action func(it Of) unit.Unit) unit.Unit {
+// Iter applies the given action to the inner value of the Of provided.
+func Iter[T any](opt Of[T], action func(it T) unit.Unit) unit.Unit {
 	if opt.IsNone() {
 		return unit.Unit{}
 	}
 
-	return action(opt.some.(Of))
+	return action(opt.some.(T))
 }

@@ -20,14 +20,12 @@ A maneira atual de se retornar um valor ou um erro, com uma tupla ` ([valor], er
 ## Comportamento
 
 ### Result
-- Todo `Result` retornado é um ponteiro (`*Result`);
 - O valor de *Ok* para um `Result` de erro é `nil`;
 - O valor de *Ok* para um `Result` de sucesso é o valor que ele guarda;
 - O valor de *erro* para um `Result` de erro é o erro que foi usado para criá-lo;
 - O valor de *erro* para um `Result` de sucesso é `nil`.
 
 ### Option
-- Todo `Option` retornado é um ponteiro (`*Option`);
 - O valor de *Some* para um `Option` que representa nada é `nil`;
 - O valor de *Some* para um `Option` que representa algo é o valor que ele guarda;
 - O valor de *None* para um `Option` que representa nada é um ponteiro para um instância recêm criada de `None`
