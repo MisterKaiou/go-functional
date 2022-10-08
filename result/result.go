@@ -50,6 +50,15 @@ func (r *Of[Ok]) Unwrap() Ok {
 	return r.ok.(Ok)
 }
 
+// UnwrapError can panic if this Of is not an error.
+func (r *Of[Ok]) UnwrapError() error {
+	if r.IsOk() {
+		panic("cannot get the error of an sucessful result")
+	}
+
+	return r.err
+}
+
 // Map applies the mapping function on the result's internal value if is not an error, and returns a new result.
 func Map[From any, To any](res Of[From], mapping func(From) To) Of[To] {
 	if res.IsError() {
